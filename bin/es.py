@@ -12,14 +12,13 @@
    with the commands: cd ./evorobotpy/lib; python3 setupevonet.py build_ext –inplace; cp net*.so ../bin 
 """
 
-
 import numpy as np
 import configparser
 import argparse
 import sys
 import os
 import subprocess
-import stat 
+import stat
 
 environment = None                      # the problem 
 algoname = "OpenAI-ES"                  # evolutionary algorithm
@@ -217,4 +216,3 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
-
