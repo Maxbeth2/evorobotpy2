@@ -127,7 +127,7 @@ class Algo(EvoAlgo):
                     candidate = self.center - self.samples[b,:] * self.noiseStdDev
                 self.policy.set_trainable_flat(candidate)
                 self.policy.nn.normphase(0) # normalization data is collected during the post-evaluation of the best sample of he previous generation
-                eval_rews, eval_length = self.policy.rollout(self.policy.ntrials, seed=(self.seed + (self.cgen * self.batchSize) + b))
+                eval_rews, eval_length = self.policy.rollout(self.policy.ntrials, seed=(self.seed + (self.cgen * self.batchSize) + b), render_time=0)
                 self.samplefitness[b*2+bb] = eval_rews
                 self.steps += eval_length
 
@@ -158,7 +158,7 @@ class Algo(EvoAlgo):
                     self.normalizationdatacollected = True
                 else:
                     self.policy.nn.normphase(0)
-                eval_rews, eval_length = self.policy.rollout(1, seed=(self.seed + 100000 + t))
+                eval_rews, eval_length = self.policy.rollout(1, seed=(self.seed + 100000 + t), rollout_time=0)
                 gfit += eval_rews               
                 self.steps += eval_length
             gfit /= self.policy.nttrials    

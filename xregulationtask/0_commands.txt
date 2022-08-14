@@ -1,0 +1,5 @@
+eval: 
+    python3 ../bin/es.py -f regulationtask.ini -g bestgS1.npy -p
+
+train:
+    python3 ../bin/es.py -f regulationtask.ini

@@ -236,7 +236,7 @@ class GymPolicy(Policy):
         self.noutputs = env.action_space.shape[0]          # only works for problems with continuous action space
         Policy.__init__(self, env, filename, seed, test)
 
-    def rollout(self, ntrials, render=False, seed=None):   # evaluate the policy for one or more episodes 
+    def rollout(self, ntrials, render=False, seed=None, render_time=0):   # evaluate the policy for one or more episodes 
         rews = 0.0                    # summed rewards
         steps = 0                     # step performed
         if (self.test == 2):          # if the policy is used to test a trained agent and to visualize the neurons, we need initialize the graphic render  
@@ -260,7 +260,7 @@ class GymPolicy(Policy):
                 if (self.test > 0):
                     if (self.test == 1):
                         self.env.render()
-                        time.sleep(0.05)
+                        time.sleep(render_time)
                     if (self.test == 2):
                         info = 'Trial %d Step %d Fit %.2f %.2f' % (trial, t, r, rew)
                         renderWorld.update(self.objs, info, self.ob, self.ac, self.nact)

@@ -152,7 +152,7 @@ class Algo(EvoAlgo):
                         normalizationdatacollected = True
                     else:
                         self.policy.nn.normphase(0)
-                    eval_rews, eval_length = self.policy.rollout(1, seed=(self.seed + 100000 + t))
+                    eval_rews, eval_length = self.policy.rollout(1, seed=(self.seed + 100000 + t), render_time=0)
                     gfit += eval_rews               
                     ceval += eval_length
                 self.updateBestg(gfit / self.policy.nttrials, self.bestsol)
@@ -170,7 +170,7 @@ class Algo(EvoAlgo):
                         candidate = self.center - self.samples[(self.id * self.n_worker_samples) + b,:] * self.noiseStdDev
                     self.policy.set_trainable_flat(candidate)
                     self.policy.nn.normphase(0)   # workers never collect normalization data
-                    eval_rews, eval_length = self.policy.rollout(self.policy.ntrials, seed=(self.seed + (self.cgen * self.batchSize) + (self.id * self.n_worker_samples) + b))
+                    eval_rews, eval_length = self.policy.rollout(self.policy.ntrials, seed=(self.seed + (self.cgen * self.batchSize) + (self.id * self.n_worker_samples) + b), render_time=0)
                     fitness_worker[b*2+bb] = eval_rews
                     ceval += eval_length
         ceval = np.asarray([ceval], dtype=np.int32)

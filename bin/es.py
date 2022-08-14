@@ -19,6 +19,11 @@ import sys
 import os
 import subprocess
 import stat
+import regulation_task
+#import balance_bot
+#import gym
+#import balance_bot
+
 
 environment = None                      # the problem 
 algoname = "OpenAI-ES"                  # evolutionary algorithm
