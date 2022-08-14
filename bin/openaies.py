@@ -158,7 +158,7 @@ class Algo(EvoAlgo):
                     self.normalizationdatacollected = True
                 else:
                     self.policy.nn.normphase(0)
-                eval_rews, eval_length = self.policy.rollout(1, seed=(self.seed + 100000 + t), rollout_time=0)
+                eval_rews, eval_length = self.policy.rollout(1, seed=(self.seed + 100000 + t), render_time=0)
                 gfit += eval_rews               
                 self.steps += eval_length
             gfit /= self.policy.nttrials    
