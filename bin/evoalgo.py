@@ -63,7 +63,7 @@ class EvoAlgo(object):
             ntrials = self.policy.nttrials
         else:
             ntrials = self.policy.ntrials
-        eval_rews, eval_length = self.policy.rollout(ntrials, render=True, seed=self.policy.get_seed + 100000)
+        eval_rews, eval_length = self.policy.rollout(ntrials, render=True, seed=self.policy.get_seed + 100000, render_time=0)
         print("Postevauation: Average Fitness %.2f Total Steps %d" % (eval_rews, eval_length))
 
     def updateBest(self, fit, ind):  # checks whether this is the best agent so far and in case store it

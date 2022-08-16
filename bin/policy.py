@@ -275,6 +275,61 @@ class GymPolicy(Policy):
             print("Average Fit %.2f Steps %.2f " % (rews, steps/float(ntrials)))
         return rews, steps
 
+class GymPolicyScalable(Policy):
+    def __init__(self, env, filename, seed, test):
+        self.ninputs = env.observation_space.shape[0]      # only works for problems with continuous observation space
+        self.noutputs = env.action_space.shape[0]          # only works for problems with continuous action space
+        Policy.__init__(self, env, filename, seed, test)
+
+    def rollout(self, ntrials, render=False, seed=None, render_time=0):   # evaluate the policy for one or more episodes 
+        rews = 0.0                    # summed rewards
+        steps = 0                     # step performed
+        if (self.test == 2):          # if the policy is used to test a trained agent and to visualize the neurons, we need initialize the graphic render  
+            import renderWorld
+            self.objs = np.arange(10, dtype=np.float64)   
+            self.objs[0] = -1 
+        if seed is not None:
+            self.env.seed(seed)          # set the seed of the environment that impacts on the initialization of the robot/environment
+            self.nn.seed(seed)           # set the seed of evonet that impacts on the noise eventually added to the activation of the neurons
+        for trial in range(ntrials):   
+            ps_o = self.env.reset()   # reset the environment at the beginning of a new episode
+            # bypass reset function to get the compound observation
+            self.ob = self.env.body.get_obs()
+            self.nn.resetNet()           # reset the activation of the neurons (necessary for recurrent policies)
+            rew = 0.0
+            t = 0
+            while t < self.maxsteps:
+                # for ob in self.ob: create ac; append ac to list of acs; feed in list of acs; profit;
+                ac = []
+                for ob in self.ob:
+                    #print(ob)
+                    self.nn.copyInput(np.float32(ob))        # copy the pointer to the observation vector to evonet and convert from float64 to float32
+                    self.nn.updateNet()                           # update the activation of the policy
+                    #print(f"\n\nACTION: {self.ac}\n\n")
+                    ac.append(self.ac)
+                #print(ac)
+                ps_o, r, done, _ = self.env.step(ac)  # perform a simulation step
+                self.ob = self.env.body.get_obs()
+                rew += r
+                t += 1
+                if (self.test > 0):
+                    if (self.test == 1):
+                        self.env.render()
+                        time.sleep(render_time)
+                    if (self.test == 2):
+                        info = 'Trial %d Step %d Fit %.2f %.2f' % (trial, t, r, rew)
+                        renderWorld.update(self.objs, info, self.ob, self.ac, self.nact)
+                if done:
+                    break
+            if (self.test > 0):
+                print("Trial %d Fit %.2f Steps %d " % (trial, rew, t))
+            steps += t
+            rews += rew
+        rews /= ntrials               # Normalize reward by the number of trials
+        if (self.test > 0 and ntrials > 1):
+            print("Average Fit %.2f Steps %.2f " % (rews, steps/float(ntrials)))
+        return rews, steps
+
 # GymDiscr policies use float64 observation and action vectors (evonet use float32) and use discrete action vectors
 # create a new observation vector each step, consequently we need to pass the pointer to evonet each step 
 # Use renderWorld to show the activation of neurons

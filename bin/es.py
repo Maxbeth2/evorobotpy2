@@ -20,6 +20,7 @@ import os
 import subprocess
 import stat
 import regulation_task
+import regulation_task_scalable
 #import balance_bot
 #import gym
 #import balance_bot
@@ -167,7 +168,14 @@ def main(argv):
         customEnv = __import__(environment)
         env = customEnv.customEnv()        
         from policy import GymPolicy
-        policy = GymPolicy(env, args.fileini, args.seed, test)      
+        policy = GymPolicy(env, args.fileini, args.seed, test)
+    elif "Scalable" in environment: #------------------------------------------------- SCALABLE POLICY --------------------------------------------
+        print("SCALABLE TASK")
+        import gym
+        from gym import spaces
+        env = gym.make(environment)
+        from policy import GymPolicyScalable
+        policy = GymPolicyScalable(env, args.fileini, args.seed, test) #--------------_________________-----------------------------------
     else:                                       # OpenAi Gym environment
         import gym
         from gym import spaces
