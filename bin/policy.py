@@ -289,15 +289,20 @@ class GymPolicyScalable(Policy):
             self.objs = np.arange(10, dtype=np.float64)   
             self.objs[0] = -1 
         if seed is not None:
-            self.env.seed(seed)          # set the seed of the environment that impacts on the initialization of the robot/environment
+            #self.env.seed(seed)          # set the seed of the environment that impacts on the initialization of the robot/environment
             self.nn.seed(seed)           # set the seed of evonet that impacts on the noise eventually added to the activation of the neurons
         for trial in range(ntrials):   
-            ps_o = self.env.reset()   # reset the environment at the beginning of a new episode
+            ps_o = self.env.reset(seed=seed)   # reset the environment at the beginning of a new episode
             # bypass reset function to get the compound observation
             self.ob = self.env.body.get_obs()
             self.nn.resetNet()           # reset the activation of the neurons (necessary for recurrent policies)
             rew = 0.0
             t = 0
+            #print(trial)
+            # if trial > 4:
+            #     self.env.body.disp = True
+            # else:
+            #     self.env.body.disp = False
             while t < self.maxsteps:
                 # for ob in self.ob: create ac; append ac to list of acs; feed in list of acs; profit;
                 ac = []
@@ -306,10 +311,12 @@ class GymPolicyScalable(Policy):
                     self.nn.copyInput(np.float32(ob))        # copy the pointer to the observation vector to evonet and convert from float64 to float32
                     self.nn.updateNet()                           # update the activation of the policy
                     #print(f"\n\nACTION: {self.ac}\n\n")
-                    ac.append(self.ac)
+                    ac.append(np.copy(self.ac))
                 #print(ac)
+                #a = input("ACTION^")
                 ps_o, r, done, _ = self.env.step(ac)  # perform a simulation step
                 self.ob = self.env.body.get_obs()
+
                 rew += r
                 t += 1
                 if (self.test > 0):
