@@ -58,6 +58,31 @@ def parseConfigFile(filename):
         print("\033[1mERROR: configuration file %s does not exist\033[0m" % (filename))
         sys.exit()
 
+
+def editEnvFromConfig(env, filename):
+    if os.path.isfile(filename):
+
+        config = configparser.ConfigParser()
+        config.read(filename)
+
+        options = config.options("ENV")
+        for o in options:
+            found = 0
+            if o == "noiseamp":
+                noiseamp = config.get("ENV","noiseamp")
+                env.body.nutrient_stream.noise_amplitude = noiseamp
+                found = 1
+            if o == "nosieoffset":
+                noiseoffset = config.get("ENV","noiseoffset")
+                env.body.nutrient_stream.noise_offset = noiseoffset
+                found = 1
+
+            if found == 0:
+                print("Using default env settings")
+
+        a = input("ENTER")
+
+
 def helper():
     print("Program Arguments: ")
     print("-f [fileini]              : the file containing the hyperparameters(mandatory)")
@@ -152,25 +177,8 @@ def main(argv):
     
     print("Experiment: Environment %s Algo %s nreplications %d " % (environment, algoname, args.nreplications))
     
-    if "Er" in environment:                   # Er environment (implemented in C++ and wrapped with Cython)
-        ErProblem = __import__(environment)
-        env = ErProblem.PyErProblem()     
-        from policy import ErPolicy
-        policy = ErPolicy(env, args.fileini, args.seed, test)
-    elif "Bullet" in environment:             # Pybullet environment 
-        import gym
-        from gym import spaces
-        import pybullet
-        import pybullet_envs
-        env = gym.make(environment)
-        from policy import BulletPolicy
-        policy = BulletPolicy(env, args.fileini, args.seed, test)
-    elif "Custom" in environment:              # Custom environment
-        customEnv = __import__(environment)
-        env = customEnv.customEnv()        
-        from policy import GymPolicy
-        policy = GymPolicy(env, args.fileini, args.seed, test)
-    elif "Scalable" in environment: #------------------------------------------------- SCALABLE POLICY --------------------------------------------
+
+    if "Scalable" in environment: #------------------------------------------------- SCALABLE POLICY --------------------------------------------
         print("SCALABLE TASK")
         import gym
         from gym import spaces
@@ -180,15 +188,16 @@ def main(argv):
     else:                                       # OpenAi Gym environment
         import gym
         from gym import spaces
-        env = gym.make(environment)               
+        env = gym.make(environment)
+        editEnvFromConfig(env=env, filename=args.fileini)               
         if (isinstance(env.action_space, gym.spaces.box.Box)):
             from policy import GymPolicy
             policy = GymPolicy(env, args.fileini, args.seed, test)      # with continuous action space
         else:
-            from policy import GymPolicyDiscr
-            policy = GymPolicyDiscr(env, args.fileini, args.seed, test) # with discrete action space
-
-    policy.environment = environment
+            print("NO Env created")
+            sys.exit()
+    
+    policy.environment = environment # only for getting input space right I think
     
     # Create the algorithm class
     if (algoname =='OpenAI-ES'):
